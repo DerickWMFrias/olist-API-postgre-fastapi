@@ -1,0 +1,8 @@
+#----- .gitignore -------
+.gitignore
+docker-compose.yml
+Dockerfile
+.env
+__pycache__
+database/pgdata
+database/**/*.csv 

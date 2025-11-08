@@ -1,0 +1,52 @@
+# Usa a imagem base Ubuntu 24.04
+FROM ubuntu:24.04
+
+# Evita prompts interativos durante instalações
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Atualiza pacotes e instala utilitários principais
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y \
+    curl \
+    wget \
+    git \
+    vim \
+    bash \
+    ca-certificates \
+    python3.12 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    gfortran \
+    libatlas-base-dev \
+    liblapack-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Atualiza pacotes e instala utilitários custom
+#RUN apt-get update && apt-get upgrade -y && \
+#    apt-get install -y \
+
+
+
+
+
+# Instala pacotes Python principais
+RUN python3.12 -m pip install --no-cache-dir --break-system-packages\
+    'fastapi[standard]' \
+    pandas \
+    numpy
+
+# Instala pacotes Python custom
+#RUN python3.12 -m pip install --no-cache-dir --break-system-packages\
+
+
+
+
+# Define o diretório de trabalho & faz cópia
+WORKDIR /app
+COPY . /app
+
+
+
+#CMD ["fastapi", "dev", "main.py", "--host=0.0.0.0", "--port=3000", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "3000", "--reload"]

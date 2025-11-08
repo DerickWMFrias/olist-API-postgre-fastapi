@@ -1,0 +1,22 @@
+services:
+  fastapi:
+    build: ./back
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database
+    volumes:
+      - ./back:/app
+    env_file:
+      - ./back/.env
+
+  database:
+    build: ./database
+    volumes:
+      - ./database/pgdata:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    env_file:
+      - ./back/.env
+
+volumes:
+  pgdata:
