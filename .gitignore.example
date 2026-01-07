@@ -6,3 +6,7 @@ Dockerfile
 __pycache__
 database/pgdata
 database/**/*.csv 
+database/init/errorlogs/*.txt
+*.txt
+.pytest_cache
+test.db
