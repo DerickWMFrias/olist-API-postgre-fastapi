@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-exec 2> /docker-entrypoint-initdb.d/errorlogs/10_errors.txt
+exec 2> /docker-entrypoint-initdb.d/errorlogs/11_errors.txt
 echo "PRODUCT_CATEGORY_NAME_TRANSLATION: Importando dados"
 
 # Caminhos internos do container
@@ -26,7 +26,7 @@ tail -n +2 "$CSV_PATH" | while IFS=',' read -r nome name; do
   #SQL="INSERT INTO $TABLE_NAME ($COLUMNS) VALUES ('$nome', '$name');"
 
   # Cria SQL para uma linha
-  printf "INSERT INTO %s (%s) VALUES (\$\$%s\$\$, \$\$%s\$\$) ON CONFLICT (product_category_name, product_category_name_english) DO NOTHING;\n" \
+  printf "INSERT INTO %s (%s) VALUES (\$\$%s\$\$, \$\$%s\$\$) ON CONFLICT (product_category_name) DO NOTHING;\n" \
     "$TABLE_NAME" "$COLUMNS" "$nome" "$name" >> "$SQL_FILE"
 
   counter=$(expr $counter + 1)
@@ -43,6 +43,8 @@ tail -n +2 "$CSV_PATH" | while IFS=',' read -r nome name; do
   fi
 done
 
+printf "INSERT INTO %s (%s) VALUES ('Nenhum', 'None') ON CONFLICT (product_category_name) DO NOTHING;\n" \
+    "$TABLE_NAME" "$COLUMNS" "$nome" "$name" >> "$SQL_FILE"
 #echo "COMMIT;" >> "$SQL_FILE"
 psql -U "$POSTGRES_USER" -d "$DB_NAME" -f "$SQL_FILE" > /dev/null
 
