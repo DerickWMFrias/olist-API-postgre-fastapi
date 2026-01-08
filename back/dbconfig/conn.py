@@ -9,10 +9,10 @@ db_name = os.getenv("POSTGRES_DB")
 host = os.getenv("DB_HOST")
 port = os.getenv("DB_PORT")
 
-engine = create_engine(f"postgresql+psycopg://{user}:{passwd}@{host}:{port}/{db_name}")
-SessionLocal = sessionmaker(bind=engine)
-
 def get_dbconn():
+    engine = create_engine(f"postgresql+psycopg://{user}:{passwd}@{host}:{port}/{db_name}")
+    SessionLocal = sessionmaker(bind=engine)
+    
     db = SessionLocal()
     try:
         yield db
