@@ -43,7 +43,7 @@ def test_GET_users_1_successful_get_data(client):
 
 
 @pytest.mark.integration
-def test_GET_users_1_not_found_user(client):
+def test_GET_users_2_not_found_user(client):
     dummy_email = "foobar@email.com"
     dummy_password = "abcd12#21dcbe"
     response = client.get(f"/users?email={dummy_email}&password={dummy_password}")
@@ -52,7 +52,7 @@ def test_GET_users_1_not_found_user(client):
 
 
 @pytest.mark.integration
-def test_GET_users_1_invalid_user_id(client):
+def test_GET_users_3_invalid_user_id(client):
     response = client.get(f"/users?badarg=imbad")
 
     assert response.status_code == 422

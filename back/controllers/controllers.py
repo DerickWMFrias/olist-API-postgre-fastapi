@@ -14,3 +14,24 @@ class UserController(InterfaceController):
         response = DTO.model_validate(model)
         logger.debug("User controller validou response c/ sucesso")
         return response
+    
+
+
+
+class GeolocationController(InterfaceController):        
+    @staticmethod
+    def validate_response(model: User, DTO: BaseModel):
+        response = DTO.model_validate(model)
+        logger.debug("Geolocation controller validou response c/ sucesso")
+        return response
+    
+
+
+
+
+class CoordinatesController(InterfaceController):        
+    @staticmethod
+    def validate_response(model: User, DTO: BaseModel):
+        response = DTO.model_validate(model)
+        logger.debug("Coordinates controller validou response c/ sucesso")
+        return response

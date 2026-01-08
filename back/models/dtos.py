@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr, ConfigDict, model_validator
+from pydantic import BaseModel, EmailStr, ConfigDict, model_validator, Field
 from uuid import UUID
+from decimal import Decimal
 
 class DTOUserPatch(BaseModel):
     email: EmailStr | None = None
@@ -24,10 +25,10 @@ class DTOUserRegister(BaseModel):
     password: str
     recovery_email: EmailStr
 
+
 class DTOUserGetData(BaseModel):
     user_id: UUID
     email: EmailStr
-    #hashed_password: str
     recovery_email: EmailStr
 
     model_config = ConfigDict(from_attributes=True)
@@ -39,3 +40,21 @@ class DTOUserResponse(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
+
+
+
+class DTOGeolocation(BaseModel):
+    geolocation_zip_code_prefix: str = Field(max_length=8)
+    geolocation_city: str
+    geolocation_state: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+
+class DTOCoordinates(BaseModel):
+    geolocation_zip_code_prefix: str = Field(max_length=8)
+    lat: Decimal
+    lng: Decimal
+
+    model_config = ConfigDict(from_attributes=True)
