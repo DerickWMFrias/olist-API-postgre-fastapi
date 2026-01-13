@@ -53,8 +53,14 @@ class DTOGeolocation(BaseModel):
 
 
 class DTOCoordinates(BaseModel):
+    coordinate_id: UUID | None = None
     geolocation_zip_code_prefix: str = Field(max_length=8)
     lat: Decimal
     lng: Decimal
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class DTOCoordinatesPaginated(BaseModel):
+    items: list[DTOCoordinates]
+    next_cursor: UUID | None
