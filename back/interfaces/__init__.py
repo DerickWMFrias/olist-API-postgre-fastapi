@@ -18,20 +18,20 @@ class InterfaceController(ABC):
 
 class InterfaceService(ABC):
     @abstractmethod
-    async def get_data(self, payload: Dict):
+    async def get_data(self, payload: Dict | BaseModel):
         pass
 
 
     @abstractmethod
-    async def register(self, payload: BaseModel):
+    async def register(self, payload: Dict | BaseModel):
         pass
 
 
     @abstractmethod
-    async def patch(self, payload: BaseModel):
+    async def patch(self, payload: Dict | BaseModel):
         pass
 
 
     @abstractmethod
-    async def delete(self, payload: BaseModel):
+    async def delete(self, payload: Dict | BaseModel):
         pass
