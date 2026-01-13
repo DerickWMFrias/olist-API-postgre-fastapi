@@ -1,0 +1,14 @@
+
+### TEST API KEY VALIDA
+GET http://localhost:3000/geo?zipcode_prefix=36025
+X-API-Key: d149023c-f5e2-4781-9b12-9c9876214563
+
+
+### TEST API KEY REVOGADA
+GET http://localhost:3000/geo?zipcode_prefix=36025
+X-API-Key: 892095f9-0351-460d-a342-a892787c805a
+
+
+### TEST API KEY EXPIRADA
+GET http://localhost:3000/geo?zipcode_prefix=36025
+X-API-Key: 52680654-e07b-40f4-8848-038c35581896
