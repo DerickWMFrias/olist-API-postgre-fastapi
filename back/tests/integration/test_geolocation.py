@@ -75,3 +75,19 @@ def test_POST_geo_2_missing_payload_fields(client):
     response = client.post("/geo/", json=payload)
     assert response.status_code == 422
 
+
+@pytest.mark.integration
+def test_DELETE_geo_1_successful_delete(client):
+    payload = {
+        "geolocation_zip_code_prefix": "31322599",
+        "geolocation_city": "São Thomé das Letras",
+        "geolocation_state": "SP"
+    }
+
+    response = client.post("/geo/", json=payload)
+    data = response.json()
+    assert response.status_code == 201
+
+
+    response = client.delete(f"/geo/{data["geolocation_zip_code_prefix"]}")
+    assert response.status_code == 204

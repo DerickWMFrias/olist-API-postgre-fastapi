@@ -1,6 +1,6 @@
 from fastapi import Request, HTTPException, status
 from fastapi.exceptions import RequestValidationError
-from models.dtos import DTOUserRegister, DTOUserResponse
+from models.dtos import DTOCoordinates, DTOCoordinatesPaginated
 from interfaces import InterfaceController
 from models.schemas import User
 import logging
@@ -35,3 +35,13 @@ class CoordinatesController(InterfaceController):
         response = DTO.model_validate(model)
         logger.debug("Coordinates controller validou response c/ sucesso")
         return response
+    
+    @staticmethod
+    def validate_response_paginated(model: dict):
+        return DTOCoordinatesPaginated(
+            items=[
+                DTOCoordinates.model_validate(item)
+                for item in model["items"]
+            ],
+            next_cursor=model["next_cursor"]
+        )
