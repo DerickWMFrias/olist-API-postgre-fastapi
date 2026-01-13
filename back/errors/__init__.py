@@ -11,6 +11,7 @@ from .errors import (
     NotFoundError,
     NoEmailFoundError,
     EmailAlreadyRegisteredError,
+    BadRequestError,
     UnauthorizedError,
     ConflictError
 )
@@ -19,6 +20,15 @@ logger = logging.getLogger(__name__)
 
 
 def register_exceptions(app: FastAPI):    
+    @app.exception_handler(BadRequestError)
+    async def unauthorized_handler(request: Request, exc: BadRequestError):
+        logger.error(exc.log_msg or "Bad Request")
+
+        return JSONResponse(
+            status_code=400,
+            content={"message": exc.err_msg}
+        )
+
     @app.exception_handler(UnauthorizedError)
     async def unauthorized_handler(request: Request, exc: UnauthorizedError):
         logger.error(exc.log_msg or "Unauthorized")
