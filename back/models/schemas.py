@@ -114,6 +114,12 @@ class Geolocation(SQLAlchemyBase):
 class Coordinates(SQLAlchemyBase):
     __tablename__ = "coordinates"
 
+    coordinate_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
+    )
+
     geolocation_zip_code_prefix: Mapped[str] = mapped_column(
         String(8),
         ForeignKey("geolocation.geolocation_zip_code_prefix")
@@ -121,12 +127,10 @@ class Coordinates(SQLAlchemyBase):
 
     lat: Mapped[Decimal] = mapped_column(
         Numeric(17, 14),
-        primary_key=True
     )
 
     lng: Mapped[Decimal] = mapped_column(
         Numeric(17, 14),
-        primary_key=True
     )
 
     #Sem list, pois cada Coordinate referencia exatamente uma Geolocation

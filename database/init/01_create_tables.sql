@@ -18,12 +18,13 @@ CREATE TABLE GEOLOCATION (
 
 
 CREATE TABLE COORDINATES (
+    coordinate_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     geolocation_zip_code_prefix VARCHAR(8),
     lat NUMERIC(17,14),
     lng NUMERIC(17,14),
 
-    CONSTRAINT pk_coordinates PRIMARY KEY (lat, lng),
-    CONSTRAINT fk_coordinates FOREIGN KEY (geolocation_zip_code_prefix) REFERENCES GEOLOCATION(geolocation_zip_code_prefix)
+    CONSTRAINT unique_coordinates UNIQUE (lat, lng),
+    CONSTRAINT fk_coordinates FOREIGN KEY (geolocation_zip_code_prefix) REFERENCES GEOLOCATION(geolocation_zip_code_prefix) ON DELETE CASCADE
 );
 
 
