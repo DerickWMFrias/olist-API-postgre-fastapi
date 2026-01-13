@@ -9,13 +9,13 @@ from uuid import UUID
 from errors.errors import NotFoundError, ConflictError, UnauthorizedError, BadRequestError
 from models.dtos import DTOGeolocation, DTOCoordinates
 from pydantic import EmailStr
-
+from lib.api_validation import validate_api_key
 
 
 router = APIRouter(prefix="/geo",
                    tags=["Geolocation"],
                    responses={},
-                   dependencies=[])
+                   dependencies=[Depends(validate_api_key)])
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
@@ -27,7 +27,7 @@ def geolocation_get_geolocation(
         service = GeolocationService(dbconn)
         controller = GeolocationController()
 
-        new_user = service.get_data(payload=dict(zipcode=zipcode_prefix))
+        new_user = service.get_data(payload=dict(geolocation_zip_code_prefix=zipcode_prefix))
         response = controller.validate_response(model=new_user,
                                                 DTO=DTOGeolocation)
         return response
@@ -36,7 +36,7 @@ def geolocation_get_geolocation(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error registering geolocation"
+            detail="Error getting geolocation"
         )
 
 

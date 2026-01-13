@@ -9,11 +9,13 @@ from uuid import UUID
 from errors.errors import NotFoundError, EmailAlreadyRegisteredError, UnauthorizedError
 from models.dtos import DTOUserResponse, DTOUserGetData, DTOUserPatch
 from pydantic import EmailStr
+from lib.api_validation import validate_api_key
+
 
 router = APIRouter(prefix="/users",
                    tags=["Users"],
                    responses={},
-                   dependencies=[])
+                   dependencies=[Depends(validate_api_key)])
 
 
 

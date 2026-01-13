@@ -1,15 +1,16 @@
 # tests/conftest.py
 import os
 import pytest
+import uuid
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 from app_factory import create_app
-
+from datetime import datetime, timezone, timedelta
 from dbconfig.conn import get_dbconn
 from dbconfig.base import Base
-
-
+from models.schemas import Keys
+from lib.api_validation import validate_api_key
 
 def make_test_engine():
     test_env = os.getenv("TEST_ENV", "mock")
@@ -67,7 +68,18 @@ def client(db_session):
     def override_get_dbconn():
         yield db_session
 
+    def override_validate_api_key():
+        return Keys(
+            id=uuid.uuid4(),
+            user_id=uuid.uuid4(),
+            key_text=uuid.uuid4(),
+            is_revoked=False,
+            expires_at_tmzone=datetime.now(timezone.utc),
+            created_at_tmzone=datetime.now(timezone.utc) + timedelta(days=365)
+        )
+
     app.dependency_overrides[get_dbconn] = override_get_dbconn
+    app.dependency_overrides[validate_api_key] = override_validate_api_key
 
     with TestClient(app) as client:
         yield client

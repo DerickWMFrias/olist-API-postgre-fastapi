@@ -20,11 +20,11 @@ class GeolocationService(InterfaceService):
         self.dbconn = db
 
     def get_data(self, payload: Dict | DTOGeolocation):
-        data = self.dbconn.query(Geolocation).filter(Geolocation.geolocation_zip_code_prefix == payload["zipcode"]).first()
+        data = self.dbconn.query(Geolocation).filter(Geolocation.geolocation_zip_code_prefix == payload["geolocation_zip_code_prefix"]).first()
         if not data:
             raise NotFoundError(
                 err_msg="Could not find such geolocation.",
-                log_msg=f"Geolocation w/ zipcode {payload["zipcode"]} not found"
+                log_msg=f"Geolocation w/ zipcode {payload['geolocation_zip_code_prefix']} not found"
             )
 
         return data
