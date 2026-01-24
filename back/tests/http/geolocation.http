@@ -1,0 +1,3 @@
+### TEST API KEY VALIDA
+GET http://localhost:3000/geo?zipcode_prefix=01009
+X-API-Key: d149023c-f5e2-4781-9b12-9c9876214563

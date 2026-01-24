@@ -7,5 +7,5 @@ router = APIRouter(prefix="",
                    dependencies=[])
 
 @router.get("/")
-def read_root():
+def say_hello():
     return {"Hello": "World"}

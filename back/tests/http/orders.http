@@ -1,0 +1,3 @@
+### TEST API KEY VALIDA
+GET http://localhost:3000/order?order_id=8272b63d03f5f79c56e9e4120aec44ef&with_customer_data=1&with_items_data=1&with_payment_data=1&with_seller_data=1
+X-API-Key: d149023c-f5e2-4781-9b12-9c9876214563

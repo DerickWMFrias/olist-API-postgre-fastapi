@@ -1,112 +1,83 @@
-import os
-import bcrypt
 import logging
-from uuid import uuid4
 from models.dtos import DTOUserRegister, DTOUserPatch
 from models.schemas import User
 from errors.errors import EmailAlreadyRegisteredError, NotFoundError, UnauthorizedError
 from uuid import UUID
-from fastapi import HTTPException
 from pydantic import EmailStr
+from repositories.users import UserRepository
+from lib.bcrypt import BcryptService
 
 logger = logging.getLogger(__name__)
 
 class UserService:
     def __init__(self, db):
-        self.rounds = int(os.getenv("BCRYPT_ROUNDS", "12"))
         self.dbconn = db
+        self.repository = UserRepository(db=db)
+        self.bcrypt_service = BcryptService()
 
-
+    def is_user_credentials_valid(self, email: EmailStr, password: str) -> bool:
+        return self.repository.auth_user_email_and_password(user_email=email, password=password)
+    
     def get_user_data(self, email: EmailStr, password: str) -> User:
-        user = self.dbconn.query(User).filter(User.email == email).first()
-        if not user:
-            raise UnauthorizedError(
-                err_msg="Invalid credentials",
-                log_msg="User not found"
-            )
-        
-        password_ok = bcrypt.checkpw(
-            password.encode("utf-8"),
-            user.hashed_password.encode("utf-8")
-        )
-
-        if not password_ok:
-            raise UnauthorizedError(
-                err_msg="Invalid credentials",
-                log_msg="Password mismatch"
-            )
+        try:
+            is_auth, user = self.repository.auth_user_email_and_password(user_email=email, 
+                                                                        password=password)
+            if not is_auth:
+                raise UnauthorizedError(
+                    err_msg="Invalid credentials",
+                    log_msg="Password mismatch"
+                )
+        except Exception as e:
+            raise e
 
         return user
 
 
     def patch_user(self, user_id: UUID, payload: DTOUserPatch) -> User:
-        user = self.dbconn.query(User).filter(User.user_id == user_id).first()
-
-        if not user:
-            raise NotFoundError(
-                err_msg="User not found",
-                log_msg=f"User {user_id} not found"
-            )
-
-        if payload.email is not None:
-            user.email = payload.email
-
-        if payload.recovery_email is not None:
-            user.recovery_email = payload.recovery_email
-
-        if payload.password is not None:
-            user.hashed_password = bcrypt.hashpw(
-                payload.password.encode("utf-8"),
-                bcrypt.gensalt(self.rounds)
-            ).decode("utf-8")
-
-        self.dbconn.commit()
-        self.dbconn.refresh(user)
+        try:
+            user = self.repository.patch_user_by_user_id(user_id=user_id, 
+                                                         payload=payload)
+            if not user:
+                raise NotFoundError(
+                    err_msg="User not found",
+                    log_msg=f"User {user_id} not found"
+                )
+        except Exception as e:
+            raise e
 
         return user
 
 
     def register_user(self, dto: DTOUserRegister) -> User:
-        # 1. VERIFICA SE USUARIO JA NAO ESTA REGISTRADO
-        user_exists = self.dbconn.query(User).filter(User.email == dto.email).first()
-        if user_exists:
-            raise EmailAlreadyRegisteredError
+        try:
+            # 1. VERIFICA SE USUARIO JA NAO ESTA REGISTRADO
+            user_exists = self.repository.get_user_data_by_email(user_email=dto.email)
+            if user_exists:
+                raise EmailAlreadyRegisteredError
 
-        # 2. GERA HASH DA SENHA
-        hashed_password = bcrypt.hashpw(
-            dto.password.encode("utf-8"),
-            bcrypt.gensalt(self.rounds)
-        ).decode("utf-8")
 
-        # 3. SALVA NO BANCO
-        new_user = User(
-            user_id=uuid4(),
-            email=dto.email,
-            hashed_password=hashed_password,
-            recovery_email=dto.recovery_email
-        )
+            hashed_password = self.bcrypt_service.hash_password(password=dto.password)
 
-        # 4. ADD NO BANCO
-        self.dbconn.add(new_user)
-        self.dbconn.commit()
-        self.dbconn.refresh(new_user)
 
-        logging.debug(f"Successful register of user w/ email {dto.email}")
+            # 3. SALVA NO BANCO
+            new_user = self.repository.register_user(email=dto.email,
+                                                    hashed_password=hashed_password,
+                                                    recovery_email=dto.recovery_email)
+            
+            logging.debug(f"Successful register of user w/ email {dto.email}")
+        except Exception as e:
+            raise e
+    
         return new_user
     
 
     
 
     def delete_user(self, user_id: UUID):
-        rows_deleted = (
-            self.dbconn
-            .query(User)
-            .filter(User.user_id == user_id)
-            .delete(synchronize_session=False)
-        )
-
-        if not rows_deleted:
-            raise NotFoundError(err_msg="User not found.",
-                                log_msg="User not found.")
-        
-        self.dbconn.commit()
+        try:
+            rows_deleted = self.repository.delete_user(user_id=user_id)
+            if not rows_deleted:
+                raise NotFoundError(err_msg="User not found.",
+                                    log_msg="User not found.")
+        except Exception as e:
+            raise e

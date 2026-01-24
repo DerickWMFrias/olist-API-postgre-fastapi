@@ -6,7 +6,7 @@ from controllers.controllers import UserController
 from services.users import UserService
 from sqlalchemy.orm import Session
 from uuid import UUID
-from errors.errors import NotFoundError, EmailAlreadyRegisteredError, UnauthorizedError
+from errors.errors import BusinessError
 from models.dtos import DTOUserResponse, DTOUserGetData, DTOUserPatch
 from pydantic import EmailStr
 from lib.api_validation import validate_api_key
@@ -41,8 +41,8 @@ def users_get_user(
                                                     DTO=DTOUserResponse)
             
         return response
-    except UnauthorizedError:
-        raise
+    except BusinessError as e:
+        raise e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -66,12 +66,12 @@ def users_register_user(
         response = controller.validate_response(model=new_user,
                                                 DTO=DTOUserResponse)
         return response
-    except EmailAlreadyRegisteredError:
-        raise
-    except Exception:
+    except BusinessError as e:
+        raise e
+    except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error registering user"
+            detail=str(exc)#"Error registering user"
         )
     
 
@@ -95,8 +95,8 @@ def users_patch_user(
         )
         return response
 
-    except NotFoundError:
-        raise
+    except BusinessError as e:
+        raise e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -113,8 +113,8 @@ def users_delete_user(
     try:
         service = UserService(dbconn)
         service.delete_user(user_id=user_id)
-    except NotFoundError:
-        raise
+    except BusinessError as e:
+        raise e
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

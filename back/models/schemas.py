@@ -516,7 +516,7 @@ class Keys(SQLAlchemyBase):
         nullable=False
     )
 
-    key_text: Mapped[str] = mapped_column(
+    key_text: Mapped[uuid.UUID] = mapped_column(
         String(64),
         nullable=False
     )
