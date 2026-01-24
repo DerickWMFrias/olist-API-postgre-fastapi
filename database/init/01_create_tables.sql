@@ -127,7 +127,7 @@ CREATE TABLE USERS(
 CREATE TABLE KEYS(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
-    key_text VARCHAR(64) NOT NULL,
+    key_text UUID NOT NULL,
     is_revoked BOOLEAN DEFAULT FALSE NOT NULL,
     expires_at_tmzone TIMESTAMP WITH TIME ZONE NOT NULL,
     created_at_tmzone TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
