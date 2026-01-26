@@ -12,6 +12,10 @@ class SellerRepository:
     def get_seller_data_by_id(self, seller_id: uuid.UUID) -> Seller:
         try:
             seller = self.dbconn.get(Seller, seller_id)
+
+            if not seller:
+                raise NotFoundError(err_msg="Seller not found.",
+                                    log_msg="Seller not found.")
         except Exception as e:
             raise e
         return seller
@@ -30,17 +34,10 @@ class SellerRepository:
 
     def update_seller_zipcode_prefix(self, seller_id: uuid.UUID, zip_code_prefix: str) -> Seller:
         try:
-            seller: Seller = self.dbconn.get(Seller, seller_id)
-            if not seller:
-                raise NotFoundError(err_msg="Seller not found.",
-                                    log_msg="Seller not found.")
-            
+            seller: Seller = self.get_seller_data_by_id(seller_id=seller_id)       
 
             geolocation_repository = GeolocationRepository(db=self.dbconn)
             geolocation = geolocation_repository.get_geolocation_data_by_zipcode_prefix(zip_code_prefix=zip_code_prefix)
-            if not geolocation:
-                raise BadRequestError(err_msg="Bad zipcode prefix",
-                                      log_msg=f"Could not find zipcode prefix {zip_code_prefix}")
 
 
             seller.seller_zip_code_prefix= zip_code_prefix

@@ -12,6 +12,10 @@ class CustomerRepository:
     def get_customer_data_by_id(self, customer_id: uuid.UUID) -> Customer:
         try:
             customer = self.dbconn.get(Customer, customer_id)
+
+            if not customer:
+                raise NotFoundError(err_msg="Customer not found.",
+                                    log_msg="Customer not found.")
         except Exception as e:
             raise e
         return customer
@@ -19,17 +23,11 @@ class CustomerRepository:
 
     def update_customer_zipcode_prefix(self, customer_id: uuid.UUID, zip_code_prefix: str) -> Customer:
         try:
-            customer = self.dbconn.get(Customer, customer_id)
-            if not customer:
-                raise NotFoundError(err_msg="Customer not found.",
-                                    log_msg="Customer not found.")
-            
+            customer = self.get_customer_data_by_id(customer_id=customer_id)
+
 
             geolocation_repository = GeolocationRepository(db=self.dbconn)
             geolocation = geolocation_repository.get_geolocation_data_by_zipcode_prefix(zip_code_prefix=zip_code_prefix)
-            if not geolocation:
-                raise BadRequestError(err_msg="Bad zipcode prefix",
-                                      log_msg=f"Could not find zipcode prefix {zip_code_prefix}")
 
 
             customer.customer_zip_code_prefix = zip_code_prefix

@@ -1,6 +1,6 @@
 from models.schemas import Geolocation
 from models.dtos import DTOGeolocation
-
+from errors.errors import BadRequestError
 class GeolocationRepository:
     def __init__(self, db):
         self.dbconn = db
@@ -8,6 +8,10 @@ class GeolocationRepository:
     def get_geolocation_data_by_zipcode_prefix(self, zip_code_prefix: str) -> Geolocation:
         try:
             geolocation = self.dbconn.get(Geolocation, zip_code_prefix)
+
+            if not geolocation:
+                raise BadRequestError(err_msg="Bad zipcode prefix",
+                                      log_msg=f"Could not find zipcode prefix {zip_code_prefix}")
         except Exception as e:
             raise e
         return geolocation

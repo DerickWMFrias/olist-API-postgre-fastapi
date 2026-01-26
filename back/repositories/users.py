@@ -3,7 +3,7 @@ import uuid
 from lib.bcrypt import BcryptService
 from pydantic import EmailStr
 from models.dtos import DTOUserPatch
-
+from errors.errors import BadRequestError
 class UserRepository:
     def __init__(self, db):
         self.dbconn = db
@@ -12,6 +12,10 @@ class UserRepository:
     def get_user_data_by_user_id(self, user_id: uuid.UUID) -> User:
         try:
             user = self.dbconn.query(User).filter(User.user_id == user_id).first()
+
+            if not user:
+                raise BadRequestError(err_msg="",
+                                      log_msg="Bad user_id")
         except Exception as e:
             raise e        
         return user

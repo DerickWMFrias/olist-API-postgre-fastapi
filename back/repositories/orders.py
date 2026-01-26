@@ -1,5 +1,6 @@
 from models.schemas import Order
 import uuid
+from errors.errors import NotFoundError
 
 class OrderRepository:
     def __init__(self, db):
@@ -8,6 +9,10 @@ class OrderRepository:
     def get_order_data_by_id(self, order_id: uuid.UUID) -> Order:
         try:
             order = self.dbconn.get(Order, order_id)
+
+            if not order:
+                raise NotFoundError(err_msg="Bad order_id",
+                                    log_msg="Bad order_id")
         except Exception as e:
             raise e
         return order

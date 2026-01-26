@@ -1,6 +1,7 @@
 from sqlalchemy import select, exists
 from models.schemas import Products
 import uuid
+from errors.errors import NotFoundError
 
 class ProductRepository:
     def __init__(self, db):
@@ -9,6 +10,10 @@ class ProductRepository:
     def get_product_by_id(self, product_id: uuid.UUID) -> Products:
         try:
             product = self.dbconn.get(Products, product_id)
+
+            if not product:
+                raise NotFoundError(err_msg="Bad product_id",
+                                    log_msg="Bad product_id")
         except Exception as e:
             raise e
         
