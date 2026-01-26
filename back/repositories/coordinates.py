@@ -10,18 +10,16 @@ class CoordinatesRepository:
     def get_coordinates_data_by_coordinate_id(self, coordinate_id: uuid.UUID) -> Coordinates:
         try:
             coordinates = self.dbconn.get(Coordinates, coordinate_id)
+
+            if not coordinates:
+                raise NotFoundError(err_msg="No coordinate with such uuid",
+                                    log_msg=f"Could not find coordinate with uuid {coordinate_id}")
         except Exception as e:
             raise e
         return coordinates
     
-    def get_coordinates_data_by_zipcode_prefix(self, zip_code_prefix: str) -> Coordinates:
-        try:
-            coordinates = self.dbconn.get(Coordinates, zip_code_prefix)
-        except Exception as e:
-            raise e
-        return coordinates
-    
-    def get_paginated_coordinates(self, limit: int, cursor: uuid.UUID, zipcode_prefix: str):
+
+    def get_paginated_coordinates(self, limit: int, cursor: uuid.UUID | None, zipcode_prefix: str) -> tuple[list[Coordinates], uuid.UUID | None]:
         try:
             if not zipcode_prefix:
                 query = (
