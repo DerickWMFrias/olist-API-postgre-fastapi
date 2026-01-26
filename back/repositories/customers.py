@@ -2,6 +2,8 @@ from typing import List
 from models.schemas import Customer
 import uuid
 from repositories.geolocation import GeolocationRepository
+from errors.errors import NotFoundError, BadRequestError
+from .geolocation import GeolocationRepository
 
 class CustomerRepository:
     def __init__(self, db):
@@ -14,11 +16,32 @@ class CustomerRepository:
             raise e
         return customer
     
-    def get_customer_data_by_zipcode_prefix(self, zip_code_prefix: str) -> List[Customer]:
-        pass
 
     def update_customer_zipcode_prefix(self, customer_id: uuid.UUID, zip_code_prefix: str) -> Customer:
-        pass
+        try:
+            customer = self.dbconn.get(Customer, customer_id)
+            if not customer:
+                raise NotFoundError(err_msg="Customer not found.",
+                                    log_msg="Customer not found.")
+            
+
+            geolocation_repository = GeolocationRepository(db=self.dbconn)
+            geolocation = geolocation_repository.get_geolocation_data_by_zipcode_prefix(zip_code_prefix=zip_code_prefix)
+            if not geolocation:
+                raise BadRequestError(err_msg="Bad zipcode prefix",
+                                      log_msg=f"Could not find zipcode prefix {zip_code_prefix}")
+
+
+            customer.customer_zip_code_prefix = zip_code_prefix
+            customer.customer_city = geolocation.geolocation_city
+            customer.customer_state = geolocation.geolocation_state
+            self.dbconn.commit()
+            self.dbconn.refresh(customer)
+        except Exception as e:
+            self.dbconn.rollback()
+            raise e
+        
+        return customer
 
     def add_new_customer(self, zip_code_prefix: str) -> Customer:
         try:
@@ -41,3 +64,49 @@ class CustomerRepository:
             raise e
         
         return new_customer
+
+    def get_customer_data_by_zipcode_prefix(self, limit: int, cursor: uuid.UUID | None, zip_code_prefix: str) -> tuple[list[Customer], uuid.UUID | None]:
+        try:
+            if not zip_code_prefix:
+                query = (
+                    self.dbconn
+                    .query(Customer)
+                    .order_by(Customer.customer_id)
+                )
+            else:
+                query = (
+                    self.dbconn
+                    .query(Customer)
+                    .filter(Customer.customer_zip_code_prefix == zip_code_prefix)
+                    .order_by(Customer.customer_id)
+                )
+
+            # Filtra por cursor
+            if cursor:
+                cursor_uuid = uuid.UUID(cursor)
+                query = query.filter(
+                    Customer.customer_id > cursor_uuid
+                )
+
+            results = query.limit(limit + 1).all()
+
+
+            # Filtra se ha resultados p/ busca
+            if not results:
+                raise BadRequestError(err_msg="Cant process sent cursor",
+                                        log_msg="Cant process sent cursor")
+
+
+            # Gera proximo cursor
+            has_next = len(results) > limit
+            items = results[:limit]
+
+            next_cursor = None
+            if has_next:
+                last = items[-1]
+                next_cursor = str(last.coordinate_id)
+
+        except Exception as e:
+            raise e
+        
+        return items, next_cursor
