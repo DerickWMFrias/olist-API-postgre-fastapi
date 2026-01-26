@@ -65,7 +65,7 @@ def keys_post_new_key(
 
 
 @router.delete("/{key_text}", status_code=status.HTTP_204_NO_CONTENT)
-def geolocation_post_geolocation(
+def keys_delete_key(
     key_text: UUID,
     payload: DTOUserAndPassword,
     dbconn: Session = Depends(get_dbconn),

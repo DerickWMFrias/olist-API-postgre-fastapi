@@ -71,16 +71,6 @@ class KeysService(InterfaceService):
                     log_msg="Password mismatch"
                 )
 
-
-            key = self.repository.get_key_by_validate_key_text(key_text=payload.key_text)
-            if not key:
-                raise UnauthorizedError(
-                    err_msg="Invalid credentials",
-                    log_msg="Key_text mismatch"
-                )
-        
-
-            self.repository.delete_key(key_todel=key)
-
+            self.repository.delete_key(key_text=payload.key_text)
         except Exception as e:
             raise e
