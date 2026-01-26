@@ -21,4 +21,14 @@ class OrderReviewRepository:
         return review
     
     def edit_review_by_review_id(self, review_id: uuid.UUID, new_review_title: str | None = None, new_review_text: str | None = None) -> OrderReview:
-        pass
+        try:
+            review = self.get_review_by_review_id(review_id=review_id)
+
+            review.review_comment_title = new_review_title
+            review.review_comment_message = new_review_text
+
+            self.dbconn.commit()
+            self.dbconn.refresh(review)
+        except Exception as e:
+            raise e
+        return review
